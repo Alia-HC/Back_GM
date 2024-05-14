@@ -8,7 +8,7 @@ const app  = express();
 const userRoutes = require("./routes/user");
 
 app.use(express.json());
-app.use('/api', userRoutes);
+app.use('/api/users', userRoutes);
 
 app.listen(PORT, () =>{
     console.log("El servidor esta en el puerto 3000");

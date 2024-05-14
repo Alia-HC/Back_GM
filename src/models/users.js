@@ -2,23 +2,19 @@ const mongoose = require("mongoose");
 
 const userSchema = mongoose.Schema(
     {
-        Nombre_usuario: {
+        username: {
             type: String,
             require: [true, "Nombre de usuario es requerido"]
         },
-        Correo: {
+        email: {
             type: String,
             require: false
         },
-        id_actividades: {
+        id_recurring: {
             type: Array,
             require: false
         },
-        id_planing: {
-            type: String,
-            require: false
-        },
-        Contra: {
+        password: {
             type: String,
             require: false 
         }
@@ -26,4 +22,4 @@ const userSchema = mongoose.Schema(
     }
 );
 
-module.exports = mongoose.model('Usuarios', userSchema, 'Usuarios');
+module.exports = mongoose.model('users', userSchema, 'users');
