@@ -9,55 +9,52 @@ router.post('/signup', async (req, res) => {
     try{
         const { username, email, id_recurring, password } = req.body;
 
-        //Usuario existente
-        if (username && email && password){
-            var exist = 0;
-            let email_exist = await users.findOne({email}) || null;
-            let user_exist = await users.findOne({username}) || null;
 
-            if(user_exist != null && email_exist != null){
-                res.send("Usuario ya registrado");
-                exist+=1;
-            } else if (user_exist !== null) {
-                res.send("Este nombre de usuario ya ha sido usado");
-                exist+=1;
-            }else if(email_exist !== null) {
-                res.send("Este correo ya ha sido registrado");
-                exist+=1;
-            } else {exist=0;}
+        if (!username || !email || !password){
+            res.send("Llena todos los campos");
+            return;
+        }
 
-            if(exist==0){
-                //Validar contraseña segura
-                if (checkpassword(password)==true){
-                    
-                    //res.send("Contraseña segura");
-
-                    // Encriptación de contraseña
-                    const passwordHash =  await encrypt(password);
-                    const user = await userSchema({
-                        username, 
-                        email, 
-                        id_recurring, 
-                        password: passwordHash
-                    })
             
-                
+        let email_exist = await users.findOne({email}) || null;
+        let user_exist = await users.findOne({username}) || null;
 
-                // //correo al usuario ya registrado
-                
-                    await user.save();
-                    res.send(user);
+        if(user_exist != null && email_exist != null){
+            res.send("Usuario ya registrado");
+            return;
+        } 
+        
+        if (user_exist !== null) {
+            res.send("Este nombre de usuario ya ha sido usado");
+            return;
+        }
+        
+        if(email_exist !== null) {
+            res.send("Este correo ya ha sido registrado");
+            return;
+        }
 
-                }
-                res.send("Tu contraseña es débil, recuerda usar...");
-                res.send(" - Al menos una letra minúscula");
-                res.send(" - Al menos una letra mayúscula");
-                res.send(" - Al menos un número");
-                res.send(" - Al menos un carácter especial");
-            }
+        
+        
+        if (!checkpassword(password)){
+            res.send("Tu contraseña es débil, recuerda usar: una mayúscula, una minúscula, un número y un carácter especial");
+            return;
+        }
 
+       
+        const passwordHash =  await encrypt(password);
+        const user = await userSchema({
+            username, 
+            email, 
+            id_recurring, 
+            password: passwordHash
+        })
+        
 
-        } else{res.send("Llena todos los campos");}
+        
+        await user.save();
+        res.send(user);
+           
     
     } catch(e){
         console.log("Error al registrar usuario ", e);
@@ -71,40 +68,26 @@ router.post('/login', async (req, res) => {
     try {
         const {username, email, password} = req.body;
 
-        if(username || email){
-            const name = await userSchema.findOne({username});
-            //const mail = await userSchema.findOne({email});
+        if(!username || !email){
+            res.send("Ingrese los datos necesarios");
+            return;
+        }
 
-            if(!name){
-                //res.status(404);
-                res.send("Usuario no encontrado");
-            }
-            
-            // if(!mail){
-            //     //res.status(404);
-            //     res.send("Usuario no encontrado");
-            // }
+        const name = await userSchema.findOne({username});
 
-            //Comparación de contraseña
-            const checkpassword = await compare(password, name.password);
-            // //Generar token de autenticación
-            
-            
-            if(checkpassword){
-                // res.send({
-                //     data: user
-                // })
-                res.send('true');
-                console.log(user);
-                //return
-            }else{
-                res.send('false');
-                // res.send({
-                //     error: 'Contraseña incorrecta'
-                // })
-            }
-            
-        }else{res.send("Ingrese los datos necesarios");}
+        if(!name){
+            res.send("Usuario no encontrado");
+            return;
+        }       
+
+        const checkpassword = await compare(password, name.password);
+         
+        if(!checkpassword){
+            res.send('false');
+            return;
+        }
+
+        //Generar Token de autenticación
 
        
     } 
